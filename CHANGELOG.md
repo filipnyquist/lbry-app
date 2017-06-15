@@ -8,7 +8,14 @@ Web UI version numbers should always match the corresponding version of LBRY App
 
 ## [Unreleased]
 ### Added
-  *
+  * State is persisted through app close and re-open, resulting in faster opens
+  * Desktop notifications on downloads finishing
+  * Support webm, ogg, m4v, and a few others
+  * Translations added to build process
+  * Claim IDs are shown in your published files
+  * Support webm, ogg, m4v, and a few others
+  * Translations added to build process
+  * Support markdown makeup in claim description
   *
 
 ### Changed

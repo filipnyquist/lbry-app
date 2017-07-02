@@ -100,7 +100,7 @@ lbryuri.parse = function(uri, requireProto = false) {
   if (
     claimId &&
     (claimId.length > CLAIM_ID_MAX_LEN || !claimId.match(/^[0-9a-f]+$/)) &&
-    !claimId.match(/^pending_/) //ought to be dropped when savePendingPublish drops hack
+    !claimId.match(/^pending/) //ought to be dropped when savePendingPublish drops hack
   ) {
     throw new Error(__(`Invalid claim ID %s.`, claimId));
   }
@@ -122,11 +122,7 @@ lbryuri.parse = function(uri, requireProto = false) {
     const pathBadChars = path.match(/[^A-Za-z0-9-]/g);
     if (pathBadChars) {
       throw new Error(
-        __(
-          `Invalid character %s in path: %s`,
-          count == 1 ? "" : "s",
-          nameBadChars.join(", ")
-        )
+        __(`Invalid character in path: %s`, pathBadChars.join(", "))
       );
     }
 

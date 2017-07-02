@@ -1,7 +1,9 @@
+const { remote } = require("electron");
 import React from "react";
 import { Thumbnail } from "component/common";
 import player from "render-media";
 import fs from "fs";
+import { setSession, getSession } from "utils";
 import LoadingScreen from "./loading-screen";
 
 class VideoPlayer extends React.PureComponent {
@@ -25,6 +27,15 @@ class VideoPlayer extends React.PureComponent {
     const renderMediaCallback = err => {
       if (err) this.setState({ unplayable: true });
     };
+    // Handle fullscreen change for the Windows platform
+    const win32FullScreenChange = e => {
+      const win = remote.BrowserWindow.getFocusedWindow();
+      if ("win32" === process.platform) {
+        win.setMenu(
+          document.webkitIsFullScreen ? null : remote.Menu.getApplicationMenu()
+        );
+      }
+    };
 
     player.append(
       this.file(),
@@ -42,7 +53,21 @@ class VideoPlayer extends React.PureComponent {
           once: true,
         }
       );
+
+      mediaElement.addEventListener(
+        "webkitfullscreenchange",
+        win32FullScreenChange.bind(this)
+      );
+      mediaElement.addEventListener("volumechange", () => {
+        setSession("prefs_volume", mediaElement.volume);
+      });
+      mediaElement.volume = this.getPreferredVolume();
     }
+  }
+
+  getPreferredVolume() {
+    const volumePreference = parseFloat(getSession("prefs_volume"));
+    return isNaN(volumePreference) ? 1 : volumePreference;
   }
 
   componentDidUpdate() {

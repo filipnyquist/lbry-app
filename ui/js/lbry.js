@@ -37,6 +37,7 @@ function apiCall(method, params, resolve, reject) {
  * Records a publish attempt in local storage. Returns a dictionary with all the data needed to
  * needed to make a dummy claim or file info object.
  */
+let pendingId = 0;
 function savePendingPublish({ name, channel_name }) {
   let uri;
   if (channel_name) {
@@ -44,14 +45,15 @@ function savePendingPublish({ name, channel_name }) {
   } else {
     uri = lbryuri.build({ name: name }, false);
   }
+  ++pendingId;
   const pendingPublishes = getLocal("pendingPublishes") || [];
   const newPendingPublish = {
     name,
     channel_name,
-    claim_id: "pending_claim_" + uri,
-    txid: "pending_" + uri,
+    claim_id: "pending-" + pendingId,
+    txid: "pending-" + pendingId,
     nout: 0,
-    outpoint: "pending_" + uri + ":0",
+    outpoint: "pending-" + pendingId + ":0",
     time: Date.now(),
   };
   setLocal("pendingPublishes", [...pendingPublishes, newPendingPublish]);
@@ -266,9 +268,10 @@ lbry.getClientSettings = function() {
   var outSettings = {};
   for (let setting of Object.keys(lbry.defaultClientSettings)) {
     var localStorageVal = localStorage.getItem("setting_" + setting);
-    outSettings[setting] = localStorageVal === null
-      ? lbry.defaultClientSettings[setting]
-      : JSON.parse(localStorageVal);
+    outSettings[setting] =
+      localStorageVal === null
+        ? lbry.defaultClientSettings[setting]
+        : JSON.parse(localStorageVal);
   }
   return outSettings;
 };
@@ -319,7 +322,7 @@ lbry.getMediaType = function(contentType, fileName) {
     }
 
     var ext = fileName.substr(dotIndex + 1);
-    if (/^mp4|m4v|mov|webm|flv|f4v|ogv$/i.test(ext)) {
+    if (/^mp4|m4v|webm|flv|f4v|ogv$/i.test(ext)) {
       return "video";
     } else if (/^mp3|m4a|aac|wav|flac|ogg|opus$/i.test(ext)) {
       return "audio";
@@ -457,6 +460,12 @@ lbry.claim_list_mine = function(params = {}) {
       },
       reject
     );
+  });
+};
+
+lbry.claim_abandon = function(params = {}) {
+  return new Promise((resolve, reject) => {
+    apiCall("claim_abandon", params, resolve, reject);
   });
 };
 

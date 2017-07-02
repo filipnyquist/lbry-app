@@ -6,7 +6,7 @@ const defaultState = {};
 
 reducers[types.FILE_LIST_STARTED] = function(state, action) {
   return Object.assign({}, state, {
-    isFileListPending: true,
+    isFetchingFileList: true,
   });
 };
 
@@ -19,10 +19,19 @@ reducers[types.FILE_LIST_COMPLETED] = function(state, action) {
     const { outpoint } = fileInfo;
 
     if (outpoint) newByOutpoint[fileInfo.outpoint] = fileInfo;
+
+    const pendingFileInfo = Object.values(pendingByOutpoint).find(
+      pending =>
+        pending.name === fileInfo.name &&
+        pending.channel_name === fileInfo.channel_name
+    );
+    if (pendingFileInfo) {
+      delete pendingByOutpoint[pendingFileInfo.outpoint];
+    }
   });
 
   return Object.assign({}, state, {
-    isFileListPending: false,
+    isFetchingFileList: false,
     byOutpoint: newByOutpoint,
     pendingByOutpoint,
   });

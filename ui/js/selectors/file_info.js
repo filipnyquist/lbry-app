@@ -13,16 +13,15 @@ export const selectFileInfosByOutpoint = createSelector(
   state => state.byOutpoint || {}
 );
 
-export const selectFileListIsPending = createSelector(
+export const selectIsFetchingFileList = createSelector(
   _selectState,
-  state => state.isFileListPending
+  state => state.isFetchingFileList
 );
 
 export const selectFileListDownloadedOrPublishedIsPending = createSelector(
-  selectFileListIsPending,
+  selectIsFetchingFileList,
   selectClaimListMineIsPending,
-  (isFileListPending, isClaimListMinePending) =>
-    isFileListPending || isClaimListMinePending
+  (isFetching, isClaimListMinePending) => isFetching || isClaimListMinePending
 );
 
 export const selectFileInfoForUri = (state, props) => {
@@ -102,7 +101,7 @@ export const selectFileInfosPublished = createSelector(
       const fileInfo = byOutpoint[outpoint];
       if (fileInfo) fileInfos.push(fileInfo);
     });
-    return fileInfos;
+    return [...fileInfos, ...pendingPublish];
   }
 );
 

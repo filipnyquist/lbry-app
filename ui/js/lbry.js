@@ -34,33 +34,6 @@ function apiCall(method, params, resolve, reject) {
 }
 
 /**
- * Records a publish attempt in local storage. Returns a dictionary with all the data needed to
- * needed to make a dummy claim or file info object.
- */
-let pendingId = 0;
-function savePendingPublish({ name, channel_name }) {
-  let uri;
-  if (channel_name) {
-    uri = lbryuri.build({ name: channel_name, path: name }, false);
-  } else {
-    uri = lbryuri.build({ name: name }, false);
-  }
-  ++pendingId;
-  const pendingPublishes = getLocal("pendingPublishes") || [];
-  const newPendingPublish = {
-    name,
-    channel_name,
-    claim_id: "pending-" + pendingId,
-    txid: "pending-" + pendingId,
-    nout: 0,
-    outpoint: "pending-" + pendingId + ":0",
-    time: Date.now(),
-  };
-  setLocal("pendingPublishes", [...pendingPublishes, newPendingPublish]);
-  return newPendingPublish;
-}
-
-/**
  * If there is a pending publish with the given name or outpoint, remove it.
  * A channel name may also be provided along with name.
  */
@@ -414,13 +387,13 @@ lbry.file_list = function(params = {}) {
      * Pending publishes use their own faux outpoints that are always unique, so we don't need
      * to check if there's a real file.
      */
-    if (outpoint) {
-      const pendingPublish = getPendingPublish({ outpoint });
-      if (pendingPublish) {
-        resolve([pendingPublishToDummyFileInfo(pendingPublish)]);
-        return;
-      }
-    }
+    // if (outpoint) {
+    //   const pendingPublish = getPendingPublish({ outpoint });
+    //   if (pendingPublish) {
+    //     resolve([pendingPublishToDummyFileInfo(pendingPublish)]);
+    //     return;
+    //   }
+    // }
 
     apiCall(
       "file_list",
@@ -452,10 +425,11 @@ lbry.claim_list_mine = function(params = {}) {
           });
         }
 
-        const dummyClaims = lbry
-          .getPendingPublishes()
-          .map(pendingPublishToDummyClaim);
-        resolve([...claims, ...dummyClaims]);
+        // const dummyClaims = lbry
+        //   .getPendingPublishes()
+        //   .map(pendingPublishToDummyClaim);
+        // resolve([...claims, ...dummyClaims]);
+        resolve(claims);
       },
       reject
     );

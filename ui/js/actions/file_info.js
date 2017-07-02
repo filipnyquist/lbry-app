@@ -6,7 +6,7 @@ import {
   selectClaimListMineIsPending,
 } from "selectors/claims";
 import {
-  selectFileListIsPending,
+  selectIsFetchingFileList,
   selectAllFileInfos,
   selectUrisLoading,
 } from "selectors/file_info";
@@ -47,9 +47,9 @@ export function doFetchFileInfo(uri) {
 export function doFileList() {
   return function(dispatch, getState) {
     const state = getState();
-    const isPending = selectFileListIsPending(state);
+    const isFetching = selectIsFetchingFileList(state);
 
-    if (!isPending) {
+    if (!isFetching) {
       dispatch({
         type: types.FILE_LIST_STARTED,
       });
@@ -98,9 +98,7 @@ export function doDeleteFile(outpoint, deleteFromComputer) {
 
 export function doFetchFileInfosAndPublishedClaims() {
   return function(dispatch, getState) {
-    const state = getState(),
-      isClaimListMinePending = selectClaimListMineIsPending(state),
-      isFileInfoListPending = selectFileListIsPending(state);
+    const state = getState();
 
     dispatch(doFetchClaimListMine());
     dispatch(doFileList());
